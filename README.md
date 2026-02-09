@@ -11,39 +11,33 @@ This repository contains two main machine learning models:
 
 ## 📊 Datasets
 
-### 1. Loan Approval Dataset
+This project uses the following datasets for training the ML models and the chatbot:
 
-**Source:** [Hugging Face - mariosyahirhalimm/loan_prediction_dataset](https://huggingface.co/datasets/mariosyahirhalimm/loan_prediction_dataset)
+### 1. Financial Risk for Loan Approval (Loan & Risk Models)
 
-- **Dataset Name:** `mariosyahirhalimm/loan_prediction_dataset`
-- **Size:** 614 samples
-- **Features:** 13 columns including:
-  - Applicant demographics (Gender, Married, Dependents, Education, Self_Employed)
-  - Financial information (ApplicantIncome, CoapplicantIncome, LoanAmount, Loan_Amount_Term)
-  - Credit information (Credit_History, Property_Area)
-  - Target: Loan_Status (Approved/Rejected)
+**Source:** [Kaggle — Financial Risk for Loan Approval](https://www.kaggle.com/datasets/lorenzozoppelletto/financial-risk-for-loan-approval)
 
-**Usage:**
-```python
-from datasets import load_dataset
-ds = load_dataset("mariosyahirhalimm/loan_prediction_dataset")
-```
+- **Dataset Name:** Financial Risk for Loan Approval
+- **Use in project:** Loan eligibility (approval/denial), default risk score, and loan amount recommendation models (see `train_loan_default_risk_model.ipynb` and `datasets/Loan.csv`).
+- **Features:** Applicant and financial attributes (e.g. Age, AnnualIncome, CreditScore, LoanAmount, LoanDuration, EmploymentStatus, EducationLevel, DebtToIncomeRatio, and targets LoanApproved, RiskScore).
+- **Note:** A cleaned/processed version may be stored in `datasets/` (e.g. `Loan.csv`, `loan_cleaned.csv`) for training and evaluation.
 
-### 2. Bitext Mortgage/Loans Chatbot Dataset
+### 2. Bitext Mortgage/Loans LLM Chatbot Training Dataset (Chatbot)
 
-**Source:** Local CSV file (`Bitext-mortgage-loans-llm-chatbot-training-dataset/bitext-mortgage-loans-llm-chatbot-training-dataset.csv`)
+**Source:** [Hugging Face — Bitext Mortgage Loans LLM Chatbot Training Dataset](https://huggingface.co/datasets/bitext/Bitext-mortgage-loans-llm-chatbot-training-dataset)
 
-- **Dataset Name:** Bitext Mortgage Loans LLM Chatbot Training Dataset
-- **Size:** ~37,778 rows (English)
-- **Format:** CSV with columns:
-  - `system_prompt` - System instructions
-  - `instruction` - User queries/questions
-  - `response` - Assistant responses
-  - `intent` - Query intent classification
-  - `category` - Query category
-  - `tags` - Additional tags
-
-**Note:** This dataset is translated to Kinyarwanda and French using NLLB (No Language Left Behind) model during training, creating a multilingual dataset with ~113,334 total samples (37,778 × 3 languages).
+- **Dataset Name:** `bitext/Bitext-mortgage-loans-llm-chatbot-training-dataset`
+- **Use in project:** Multilingual loan/mortgage chatbot (English, with translation to Kinyarwanda and French via NLLB in training).
+- **Size:** ~36.8k rows (train split).
+- **Format:** CSV/Parquet with columns:
+  - `system_prompt` — System instructions for the assistant
+  - `instruction` — User queries (mortgage/loans domain)
+  - `response` — Expected assistant responses
+  - `intent` — Query intent (e.g. add_coborrower, apply_for_loan)
+  - `category` — High-level category (e.g. LOAN_MODIFICATIONS, PAYMENT)
+  - `tags` — Language/style tags
+- **License:** CDLA-Sharing 1.0 ([dataset card](https://huggingface.co/datasets/bitext/Bitext-mortgage-loans-llm-chatbot-training-dataset)).
+- **Local copy:** `Bitext-mortgage-loans-llm-chatbot-training-dataset/bitext-mortgage-loans-llm-chatbot-training-dataset.csv` (or under `datasets/`).
 
 ## 🤖 Algorithms & Models
 

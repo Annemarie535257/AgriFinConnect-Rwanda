@@ -1,0 +1,19 @@
+# AgriFinConnect Rwanda — Backend (Django + ML + Chatbot)
+# Django & API
+Django>=4.2,<5.1
+djangorestframework>=3.14
+django-cors-headers>=4.3
+drf-yasg>=1.21
+
+# ML (eligibility, risk, loan amount)
+joblib>=1.3
+pandas>=2.0
+numpy>=1.24
+scikit-learn>=1.3
+
+# Chatbot: saved T5 model (saved-model/) — Financial_LLM_Chatbot.ipynb
+# TFT5ForConditionalGeneration was removed in transformers 5.x; use 4.x for TF T5.
+transformers>=4.30,<5.0
+tensorflow>=2.13
+sentencepiece>=0.1.99
+huggingface-hub>=0.20
