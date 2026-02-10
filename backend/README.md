@@ -34,6 +34,18 @@ python manage.py migrate
 python manage.py runserver
 ```
 
+**Create test users (farmer + microfinance):**
+
+```bash
+python manage.py createtestusers
+```
+
+This creates:
+- **Farmer:** `farmer@test.agrifinconnect.rw` / `Farmer123!`
+- **Microfinance:** `microfinance@test.agrifinconnect.rw` / `Microfinance123!`
+
+Use these to log in on the Get Started page and view the dashboards.
+
 API base: **http://localhost:8000/api/**  
 **Swagger UI:** http://localhost:8000/swagger/  
 **ReDoc:** http://localhost:8000/redoc/
@@ -47,6 +59,8 @@ API base: **http://localhost:8000/api/**
 |--------|------|-------------|
 | POST | `/api/auth/register/` | Register (body: `email`, `password`, `role`: `farmer` \| `microfinance`, optional `name`) |
 | POST | `/api/auth/login/` | Login (body: `email`, `password`). Returns `token` + `user` (id, email, role). |
+| POST | `/api/auth/forgot-password/` | Request password reset (body: `email`). Sends reset link to email. |
+| POST | `/api/auth/reset-password/` | Set new password (body: `token`, `new_password`). Token from email link. |
 
 **Create an admin user (backend):**
 
@@ -55,6 +69,17 @@ python manage.py createsuperuser   # create a Django superuser (e.g. admin@examp
 # Then in Django admin (http://localhost:8000/admin/): add UserProfile for that user with role "Admin"
 # Or: staff/superuser users without a UserProfile are treated as role "admin" at login.
 ```
+
+## Activity tracking (Get Started) + Admin API
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/activity/log/` | Log Get Started event (no auth). Body: `{ "event_type": "modal_opened" \| "register_clicked" \| "login_clicked", "role": "farmers" \| "microfinances" \| "admin" }` |
+| GET | `/api/admin/activity/` | List Get Started events (admin token required). Query: `?limit=100` |
+
+**Admin can view activity:**
+- **Django admin:** `http://localhost:8000/admin/` → Get Started events (after `python manage.py migrate`)
+- **API:** `GET /api/admin/activity/` with header `Authorization: Token <admin_token>`
 
 ## ML & Chat endpoints
 

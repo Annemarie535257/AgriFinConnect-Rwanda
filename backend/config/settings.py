@@ -88,3 +88,9 @@ CORS_ALLOW_CREDENTIALS = True
 
 # ML models path (saved .pkl from notebook)
 MODELS_DIR = PROJECT_ROOT / 'loan_default_risk_model'
+
+# Email (for password reset). Console backend prints to terminal in dev.
+EMAIL_BACKEND = os.environ.get('DJANGO_EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+DEFAULT_FROM_EMAIL = os.environ.get('DJANGO_FROM_EMAIL', 'noreply@agrifinconnect.rw')
+# Frontend URL for reset links (set in production)
+PASSWORD_RESET_FRONTEND_URL = os.environ.get('PASSWORD_RESET_FRONTEND_URL', 'http://localhost:3000')

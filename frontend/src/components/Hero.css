@@ -104,6 +104,17 @@
   box-shadow: 0 4px 14px rgba(13, 92, 46, 0.3);
 }
 
+.hero__btn--secondary {
+  background: transparent;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+}
+
+.hero__btn--secondary:hover {
+  background: rgba(13, 92, 46, 0.06);
+  transform: translateY(-2px);
+}
+
 /* Right side: image with teal circle and decorative overlays */
 .hero__visual {
   position: relative;

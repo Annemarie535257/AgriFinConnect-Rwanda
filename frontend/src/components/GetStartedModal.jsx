@@ -1,14 +1,16 @@
 import { useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import { logGetStartedActivity } from '../api/client';
 import './GetStartedModal.css';
 
-const ROLES = ['farmers', 'microfinances', 'admin'];
+const ROLES = ['farmers', 'microfinances'];
 
 export default function GetStartedModal({ isOpen, onClose, onLogin }) {
   const { t } = useLanguage();
 
   useEffect(() => {
     if (!isOpen) return;
+    logGetStartedActivity('modal_opened');
     const handleEscape = (e) => e.key === 'Escape' && onClose();
     document.addEventListener('keydown', handleEscape);
     document.body.style.overflow = 'hidden';
@@ -21,11 +23,13 @@ export default function GetStartedModal({ isOpen, onClose, onLogin }) {
   if (!isOpen) return null;
 
   const handleRegister = (role) => {
+    logGetStartedActivity('register_clicked', role);
     // Placeholder: coming soon or future route
     alert(t('getStarted.comingSoon'));
   };
 
   const handleLogin = (role) => {
+    logGetStartedActivity('login_clicked', role);
     onLogin?.(role);
   };
 

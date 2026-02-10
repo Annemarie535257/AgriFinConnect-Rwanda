@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import './Hero.css';
 
-export default function Hero({ onOpenGetStarted }) {
+export default function Hero() {
   const { t } = useLanguage();
 
   return (
@@ -16,16 +16,18 @@ export default function Hero({ onOpenGetStarted }) {
           <p className="hero__tagline">{t('hero.tagline')}</p>
           <p className="hero__intro">{t('hero.intro')}</p>
           <div className="hero__cta">
-            <button
-              type="button"
+            <Link
+              to="/get-started"
               className="hero__btn hero__btn--primary"
-              onClick={() => onOpenGetStarted?.()}
             >
-              <span className="hero__btn-icon" aria-hidden="true">
-                <PlayIcon />
-              </span>
-              {t('hero.learnMore')}
-            </button>
+              {t('nav.getStarted')}
+            </Link>
+            <Link
+              to="/try-models"
+              className="hero__btn hero__btn--secondary"
+            >
+              {t('nav.tryModels')}
+            </Link>
           </div>
         </div>
         <div className="hero__visual" aria-hidden="true">

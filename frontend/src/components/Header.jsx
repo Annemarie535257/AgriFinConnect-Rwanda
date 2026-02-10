@@ -11,7 +11,7 @@ const NAV_KEYS = [
   { key: 'contact', to: '/', hash: '#contact' },
 ];
 
-export default function Header({ onOpenGetStarted }) {
+export default function Header() {
   const { t, language, setLanguage } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
@@ -62,16 +62,13 @@ export default function Header({ onOpenGetStarted }) {
                 <option value="rw">{languageNames.rw}</option>
               </select>
             </div>
-            <button
-              type="button"
-              className="header__cta"
-              onClick={() => {
-                setMenuOpen(false);
-                onOpenGetStarted?.();
-              }}
+            <Link
+              to="/get-started"
+              className="header__cta header__cta--link"
+              onClick={() => setMenuOpen(false)}
             >
               {t('nav.getStarted')}
-            </button>
+            </Link>
           </nav>
         </div>
       </div>

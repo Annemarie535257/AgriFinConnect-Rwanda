@@ -25,6 +25,9 @@ async function request(endpoint, options = {}) {
     } catch {
       err.body = await res.text();
     }
+    if (res.status === 400 && import.meta.env.DEV) {
+      console.warn('[API 400]', url, err.body);
+    }
     throw err;
   }
   const contentType = res.headers.get('content-type');
@@ -52,4 +55,136 @@ export async function recommendLoanAmount(payload) {
 /** POST /api/chat — chatbot (multilingual) */
 export async function chat(message, language = 'en') {
   return request('/chat/', { method: 'POST', body: { message, language } });
+}
+
+/** POST /api/auth/register — register farmer or microfinance */
+export async function register({ email, password, role, name }) {
+  return request('/auth/register/', {
+    method: 'POST',
+    body: { email, password, role, name: name || '' },
+  });
+}
+
+/** POST /api/auth/login — login (all roles) */
+export async function login({ email, password }) {
+  return request('/auth/login/', {
+    method: 'POST',
+    body: { email, password },
+  });
+}
+
+/** POST /api/auth/forgot-password — request password reset email */
+export async function forgotPassword({ email }) {
+  return request('/auth/forgot-password/', {
+    method: 'POST',
+    body: { email: (email || '').trim().toLowerCase() },
+  });
+}
+
+/** POST /api/auth/reset-password — set new password with token */
+export async function resetPassword({ token, newPassword }) {
+  return request('/auth/reset-password/', {
+    method: 'POST',
+    body: { token: (token || '').trim(), new_password: newPassword },
+  });
+}
+
+/** POST /api/activity/log — log Get Started activity (no auth). Fire-and-forget. */
+export async function logGetStartedActivity(eventType, role = '') {
+  try {
+    await fetch(`${import.meta.env.VITE_API_URL || '/api'}/activity/log/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event_type: eventType, role }),
+    });
+  } catch {
+    // Silently ignore; analytics should not block UX
+  }
+}
+
+/** GET /api/admin/activity — list Get Started events (admin token required) */
+export async function getAdminActivity(token, limit = 100) {
+  return request(`/admin/activity/?limit=${limit}`, {
+    method: 'GET',
+    headers: { Authorization: `Token ${token}` },
+  });
+}
+
+/** Authenticated request helper */
+function authRequest(endpoint, options = {}) {
+  const token = localStorage.getItem('agrifinconnect-token');
+  const headers = {
+    ...options.headers,
+    Authorization: token ? `Token ${token}` : '',
+  };
+  return request(endpoint, { ...options, headers });
+}
+
+/** GET /api/admin/users — list users (admin token) */
+export async function getAdminUsers(token, role = '', limit = 50) {
+  const params = new URLSearchParams();
+  if (role) params.set('role', role);
+  params.set('limit', limit);
+  return request(`/admin/users/?${params}`, {
+    headers: { Authorization: `Token ${token}` },
+  });
+}
+
+/** GET /api/admin/stats — dashboard stats (admin token) */
+export async function getAdminStats(token) {
+  return request('/admin/stats/', {
+    headers: { Authorization: `Token ${token}` },
+  });
+}
+
+// ----- Farmer APIs -----
+
+/** GET /api/farmer/profile */
+export async function getFarmerProfile() {
+  return authRequest('/farmer/profile/');
+}
+
+/** PATCH /api/farmer/profile */
+export async function updateFarmerProfile(data) {
+  return authRequest('/farmer/profile/', { method: 'PATCH', body: data });
+}
+
+/** GET /api/farmer/applications */
+export async function getFarmerApplications() {
+  return authRequest('/farmer/applications/');
+}
+
+/** POST /api/farmer/applications — submit new loan application */
+export async function submitFarmerApplication(data) {
+  return authRequest('/farmer/applications/', { method: 'POST', body: data });
+}
+
+/** GET /api/farmer/loans */
+export async function getFarmerLoans() {
+  return authRequest('/farmer/loans/');
+}
+
+/** GET /api/farmer/repayments */
+export async function getFarmerRepayments() {
+  return authRequest('/farmer/repayments/');
+}
+
+// ----- MFI APIs -----
+
+/** GET /api/mfi/applications */
+export async function getMfiApplications(status = 'pending') {
+  return authRequest(`/mfi/applications/?status=${status}`);
+}
+
+/** POST /api/mfi/applications/<id>/review — approve or reject */
+export async function reviewMfiApplication(id, action, data = {}) {
+  return authRequest(`/mfi/applications/${id}/review/`, {
+    method: 'POST',
+    body: { action, ...data },
+  });
+}
+
+/** GET /api/mfi/portfolio */
+export async function getMfiPortfolio() {
+  return authRequest('/mfi/portfolio/');
 }

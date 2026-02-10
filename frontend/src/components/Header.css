@@ -111,7 +111,11 @@
   text-underline-offset: 4px;
 }
 
-.header__cta {
+.header__cta,
+.header__cta--link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin-left: 0.5rem;
   min-height: 44px;
   padding: 0.5rem 1.25rem;
@@ -124,6 +128,7 @@
   cursor: pointer;
   transition: background 0.2s, color 0.2s, transform 0.15s;
   box-shadow: 0 2px 6px rgba(13, 92, 46, 0.25);
+  text-decoration: none;
 }
 
 .header__cta:hover {
