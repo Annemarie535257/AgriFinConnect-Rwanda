@@ -62,10 +62,13 @@ def _load_chatbot():
         return False
 
 
-def generate_reply(message, max_new_tokens=None, temperature=None):
+def generate_reply(message, language='en', max_new_tokens=None, temperature=None):
     """
     Generate a chatbot reply using the saved T5 model.
-    Returns the reply string, or None if model unavailable or generation fails.
+    NOTE: The core model is trained primarily on English; callers that
+    need other languages should translate externally (see translation_service).
+    The `language` argument is accepted for backwards compatibility but
+    is currently not used to change generation behaviour.
     """
     if not message or not str(message).strip():
         return None
@@ -73,8 +76,10 @@ def generate_reply(message, max_new_tokens=None, temperature=None):
         return None
     max_new_tokens = max_new_tokens if max_new_tokens is not None else DEFAULT_MAX_NEW_TOKENS
     temperature = temperature if temperature is not None else DEFAULT_TEMPERATURE
+
     try:
         import tensorflow as tf
+
         input_text = INPUT_PREFIX + str(message).strip()
         inputs = _tokenizer(
             [input_text],
@@ -92,6 +97,7 @@ def generate_reply(message, max_new_tokens=None, temperature=None):
         )
         reply = _tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
         return reply.strip() if reply else None
+
     except Exception:
         return None
 

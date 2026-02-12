@@ -114,18 +114,23 @@ def recommend_amount(request):
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@swagger_auto_schema(method='post', operation_description='Multilingual chatbot (Kinyarwanda, English, French). POST message + language. Uses saved T5 model when available.', request_body=_chat_request, responses={200: _chat_response}, tags=['Chatbot'])
+@swagger_auto_schema(method='post', operation_description='Multilingual chatbot (Kinyarwanda, English, French). POST message + language. Uses saved T5 model when available, with separate translation models for FR/RW.', request_body=_chat_request, responses={200: _chat_response}, tags=['Chatbot'])
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def chat(request):
     """POST /api/chat/ — Chatbot using saved T5 model (saved-model/); falls back to placeholder if unavailable."""
     from api.chatbot_service import generate_reply
+    from api.translation_service import to_english, from_english
     payload = _get_payload(request)
-    message = (payload.get('message') or '').strip()
-    language = payload.get('language', 'en')
-    if not message:
+    raw_message = (payload.get('message') or '').strip()
+    language = (payload.get('language') or 'en').lower()
+    if not raw_message:
         return Response({'reply': 'Please send a message.', 'response': 'Please send a message.'})
-    reply = generate_reply(message)
+    # If user is not in English, first translate question to English for the
+    # financial chatbot model, then translate the answer back.
+    question_for_model = to_english(raw_message, source_lang=language)
+    reply_en = generate_reply(question_for_model, language='en')
+    reply = reply_en
     if reply is None:
         # Fallback when model not loaded or generation failed
         from api.chatbot_service import get_load_error
@@ -150,7 +155,12 @@ def chat(request):
         if getattr(settings, 'DEBUG', False) and err_msg:
             payload['chatbot_load_error'] = err_msg
         return Response(payload)
-    return Response({'reply': reply, 'response': reply})
+    # Translate final answer back to requested language (FR/RW) when needed.
+    final_reply = from_english(reply_en, target_lang=language)
+    resp = {'reply': final_reply, 'response': final_reply}
+    if getattr(settings, 'DEBUG', False) and language != 'en':
+        resp['source_reply_en'] = reply_en
+    return Response(resp)
 
 
 # ----- Auth APIs (documented in Swagger) -----

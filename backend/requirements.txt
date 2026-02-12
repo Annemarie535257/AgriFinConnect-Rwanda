@@ -17,3 +17,6 @@ transformers>=4.30,<5.0
 tensorflow>=2.13
 sentencepiece>=0.1.99
 huggingface-hub>=0.20
+
+# Translation models (French/Kinyarwanda) — MarianMT via PyTorch
+torch>=2.2

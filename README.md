@@ -1,234 +1,374 @@
-# AgriFinConnect-Rwanda
+# AgriFinConnect Rwanda
 
-A comprehensive machine learning project for agricultural financial services in Rwanda, featuring loan approval prediction and multilingual chatbot support.
+[![GitHub](https://img.shields.io/badge/GitHub-AgriFinConnect--Rwanda-181717?logo=github)](https://github.com/Annemarie535257/AgriFinConnect-Rwanda)
 
-## 📋 Project Overview
+**Repository:** [https://github.com/Annemarie535257/AgriFinConnect-Rwanda](https://github.com/Annemarie535257/AgriFinConnect-Rwanda)
 
-This repository contains two main machine learning models:
-
-1. **Loan Approval Classifier** - Predicts loan approval/rejection based on applicant features
-2. **Multilingual Loan Chatbot** - AI chatbot that provides loan application guidance in English, Kinyarwanda, and French
-
-## 📊 Datasets
-
-This project uses the following datasets for training the ML models and the chatbot:
-
-### 1. Financial Risk for Loan Approval (Loan & Risk Models)
-
-**Source:** [Kaggle — Financial Risk for Loan Approval](https://www.kaggle.com/datasets/lorenzozoppelletto/financial-risk-for-loan-approval)
-
-- **Dataset Name:** Financial Risk for Loan Approval
-- **Use in project:** Loan eligibility (approval/denial), default risk score, and loan amount recommendation models (see `train_loan_default_risk_model.ipynb` and `datasets/Loan.csv`).
-- **Features:** Applicant and financial attributes (e.g. Age, AnnualIncome, CreditScore, LoanAmount, LoanDuration, EmploymentStatus, EducationLevel, DebtToIncomeRatio, and targets LoanApproved, RiskScore).
-- **Note:** A cleaned/processed version may be stored in `datasets/` (e.g. `Loan.csv`, `loan_cleaned.csv`) for training and evaluation.
-
-### 2. Bitext Mortgage/Loans LLM Chatbot Training Dataset (Chatbot)
-
-**Source:** [Hugging Face — Bitext Mortgage Loans LLM Chatbot Training Dataset](https://huggingface.co/datasets/bitext/Bitext-mortgage-loans-llm-chatbot-training-dataset)
-
-- **Dataset Name:** `bitext/Bitext-mortgage-loans-llm-chatbot-training-dataset`
-- **Use in project:** Multilingual loan/mortgage chatbot (English, with translation to Kinyarwanda and French via NLLB in training).
-- **Size:** ~36.8k rows (train split).
-- **Format:** CSV/Parquet with columns:
-  - `system_prompt` — System instructions for the assistant
-  - `instruction` — User queries (mortgage/loans domain)
-  - `response` — Expected assistant responses
-  - `intent` — Query intent (e.g. add_coborrower, apply_for_loan)
-  - `category` — High-level category (e.g. LOAN_MODIFICATIONS, PAYMENT)
-  - `tags` — Language/style tags
-- **License:** CDLA-Sharing 1.0 ([dataset card](https://huggingface.co/datasets/bitext/Bitext-mortgage-loans-llm-chatbot-training-dataset)).
-- **Local copy:** `Bitext-mortgage-loans-llm-chatbot-training-dataset/bitext-mortgage-loans-llm-chatbot-training-dataset.csv` (or under `datasets/`).
-
-## 🤖 Algorithms & Models
-
-### 1. Loan Approval Model (`train_loan_approval_model.ipynb`)
-
-#### Primary Algorithm: **Random Forest Classifier**
-- **Library:** scikit-learn
-- **Model:** `RandomForestClassifier`
-- **Hyperparameters:**
-  - `n_estimators`: 100 (number of decision trees)
-  - `max_depth`: 10
-  - `random_state`: 42
-- **Performance:** ~83.7% accuracy on validation set
-- **Training Method:** Ensemble learning with 100 decision trees
-
-#### Alternative Algorithm: **XGBoost Classifier**
-- **Library:** XGBoost
-- **Model:** `XGBClassifier`
-- **Hyperparameters:**
-  - `n_estimators`: 100 (number of boosting rounds)
-  - `max_depth`: 6
-  - `random_state`: 42
-  - `eval_metric`: "logloss"
-- **Performance:** ~80.5% accuracy on validation set
-- **Training Method:** Gradient boosting with 100 boosting rounds
-
-**Note:** Both algorithms use `n_estimators` (number of trees/boosting rounds), not epochs. The models train all trees/rounds in a single pass.
-
-**Preprocessing:**
-- Label encoding for categorical variables
-- Standard scaling for numerical features
-- Missing value imputation (median for numeric, mode for categorical)
-- Outlier handling using IQR method
-
-### 2. Multilingual Chatbot (`train_agrifinconnect_chatbot.ipynb`)
-
-#### Base Model: **Llama 3.2 3B Instruct**
-- **Model:** `meta-llama/Llama-3.2-3B-Instruct`
-- **Source:** [Hugging Face - Meta Llama 3.2 3B Instruct](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct)
-- **License:** Requires Meta license acceptance
-- **Architecture:** Transformer-based causal language model
-- **Parameters:** 3 billion
-
-#### Fine-tuning Method: **LoRA (Low-Rank Adaptation) / PEFT**
-- **Library:** PEFT (Parameter-Efficient Fine-Tuning)
-- **Method:** LoRA with 4-bit quantization
-- **LoRA Configuration:**
-  - `r`: 16 (rank)
-  - `lora_alpha`: 32
-  - `lora_dropout`: 0.05
-  - `target_modules`: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
-- **Quantization:** 4-bit (BitsAndBytesConfig) for memory efficiency
-- **Training Hyperparameters:**
-  - `epochs`: 2
-  - `learning_rate`: 2e-5
-  - `max_seq_length`: 1024
-  - `batch_size`: 2 (per device)
-  - `gradient_accumulation_steps`: 4
-  - `fp16`: True
-
-#### Translation Model: **NLLB (No Language Left Behind)**
-- **Model:** `facebook/nllb-200-distilled-600M`
-- **Source:** [Hugging Face - NLLB 200](https://huggingface.co/facebook/nllb-200-distilled-600M)
-- **Purpose:** Translates English dataset to Kinyarwanda (`kin_Latn`) and French (`fra_Latn`)
-- **Languages Supported:** 200+ languages
-- **Architecture:** Sequence-to-sequence transformer
-
-## 🚀 Setup
-
-### Prerequisites
-- Python 3.9+
-- Jupyter Notebook
-- GPU recommended for chatbot training (optional for loan approval model)
-
-### Installation
-
-1. Clone the repository:
 ```bash
 git clone https://github.com/Annemarie535257/AgriFinConnect-Rwanda.git
-cd AgriFinConnect-Rwanda
 ```
-
-2. Create a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-### Additional Setup for Chatbot Training
-
-1. **Hugging Face Account:**
-   - Create an account at [Hugging Face](https://huggingface.co/)
-   - Accept Meta's Llama license at [Llama 3.2 3B Instruct](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct)
-   - Login via CLI:
-   ```bash
-   huggingface-cli login
-   ```
-
-2. **Dataset:**
-   - Ensure the Bitext dataset CSV file is in the `Bitext-mortgage-loans-llm-chatbot-training-dataset/` directory
-
-## 📁 Project Structure
-
-```
-AgriFinConnect-Rwanda/
-├── train_loan_approval_model.ipynb      # Loan approval classifier training
-├── train_agrifinconnect_chatbot.ipynb   # Multilingual chatbot training
-├── loan_approval_model/                 # Saved model artifacts
-│   ├── loan_classifier.joblib
-│   ├── label_encoder.joblib
-│   ├── scaler.joblib
-│   └── feature_columns.joblib
-├── Bitext-mortgage-loans-llm-chatbot-training-dataset/
-│   └── bitext-mortgage-loans-llm-chatbot-training-dataset.csv
-├── requirements.txt                      # Python dependencies
-└── README.md                            # This file
-```
-
-## 📝 Usage
-
-### Loan Approval Model
-
-1. Open `train_loan_approval_model.ipynb`
-2. Run all cells sequentially
-3. The model will be saved in `loan_approval_model/` directory
-4. Use the saved model for predictions on new loan applications
-
-### Multilingual Chatbot
-
-1. Open `train_agrifinconnect_chatbot.ipynb`
-2. Ensure you're logged into Hugging Face
-3. Run all cells sequentially
-4. The fine-tuned model will be saved in `agrifinconnect-loan-chatbot/` directory
-5. Use the model for multilingual loan application support
-
-## 🔧 Key Features
-
-### Loan Approval Model
-- ✅ Data cleaning and preprocessing
-- ✅ Comprehensive visualizations
-- ✅ Multiple algorithm support (Random Forest, XGBoost)
-- ✅ Confusion matrix visualization
-- ✅ Feature importance analysis
-- ✅ Model testing with sample predictions
-
-### Multilingual Chatbot
-- ✅ Supports 3 languages (English, Kinyarwanda, French)
-- ✅ Automatic translation using NLLB
-- ✅ Efficient fine-tuning with LoRA
-- ✅ 4-bit quantization for memory efficiency
-- ✅ Chat format compatible with Llama 3.2
-
-## 📚 Dependencies
-
-See `requirements.txt` for the complete list. Key packages include:
-
-- **Loan Approval Model:**
-  - `scikit-learn` - Machine learning algorithms
-  - `xgboost` - Gradient boosting
-  - `pandas` - Data manipulation
-  - `matplotlib`, `seaborn` - Visualizations
-  - `datasets` - Hugging Face datasets
-
-- **Chatbot Model:**
-  - `transformers` - Hugging Face transformers
-  - `peft` - Parameter-efficient fine-tuning
-  - `bitsandbytes` - Quantization
-  - `accelerate` - Training acceleration
-  - `torch` - PyTorch
-
-## 📄 License
-
-Please check individual model licenses:
-- **Llama 3.2:** Requires Meta license acceptance
-- **NLLB:** Check Facebook/Meta license terms
-- **Other models:** Check respective Hugging Face model cards
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📧 Contact
-
-For questions or issues, please open an issue on GitHub.
 
 ---
 
-**Note:** This project is part of the AgriFinConnect initiative for agricultural financial services in Rwanda.
+## Description
+
+AgriFinConnect Rwanda is a project aimed at **improving agricultural finance and services for smallholder farmers in Rwanda using AI**. It is an end‑to‑end platform that combines:
+
+- A **React web app** for farmers, microfinance institutions (MFIs), and admins  
+- A **Django REST API** for authentication, dashboards, and ML inference  
+- **ML models** for loan eligibility, default risk scoring, and loan amount recommendation  
+- A **financial assistant chatbot** (Flan‑T5) with support for **English, French, and Kinyarwanda**
+
+The platform helps farmers explore loan eligibility and recommended amounts, allows MFIs to review applications and manage portfolio risk, and provides a multilingual AI assistant for loan-related questions.
+
+---
+
+## 1. High‑Level Architecture
+
+- **Frontend** (`frontend/`)
+  - React + Vite single‑page app
+  - Landing page, “Try Models” playground, and role‑based dashboards
+  - Floating chatbot + chatbot card calling the backend `/api/chat/`
+
+- **Backend** (`backend/`)
+  - Django REST Framework API
+  - Endpoints for:
+    - Auth (register/login, password reset)
+    - ML models: eligibility, risk score, loan amount
+    - Chatbot: `/api/chat/`
+    - Farmer, Microfinance, and Admin dashboards
+  - Swagger/OpenAPI at `/swagger/`, ReDoc at `/redoc/`
+
+- **ML & Data Science** (`Notebooks/`, `datasets/`, `loan_default_risk_model/`)
+  - `train_loan_default_risk_model.ipynb`: trains the three loan models and exports `.pkl` artifacts
+  - `Financial_LLM_Chatbot.ipynb`: fine‑tunes Flan‑T5 on a loan/mortgage Q&A dataset and exports to `saved-model/`
+
+- **Models on disk**
+  - `loan_default_risk_model/` — sklearn / XGBoost models + preprocessing artifacts
+  - `saved-model/` (not tracked by git) — T5 model + tokenizer for the chatbot
+
+---
+
+## 2. Features
+
+- **Loan eligibility (Model 1)**
+  - Predicts whether a loan application is likely to be **approved or denied**
+  - Provides an explanation string describing key factors (income, credit score, etc.)
+
+- **Default risk score (Model 2)**
+  - Returns a numeric **risk score** and interpretation buckets (low/medium/high risk)
+
+- **Loan amount recommendation (Model 3)**
+  - Suggests a **recommended loan amount** for approved profiles
+  - Explains the reasoning in plain language
+
+- **Chatbot**
+  - Uses a fine‑tuned **Flan‑T5** model served from `saved-model/`
+  - Answers questions about loans, applications, repayment, etc.
+  - Accepts a `language` field (`en`, `fr`, `rw`) and uses MarianMT models to translate
+    questions/answers between English, French, and Kinyarwanda
+
+- **Dashboards**
+  - **Farmer dashboard**: profile, applications, approved loans, repayments
+  - **MFI dashboard**: application review, portfolio stats, repayment performance
+  - **Admin dashboard**: user stats, application breakdown, Get Started activity log
+
+---
+
+## 3. Project Structure
+
+```text
+AgriFinConnect-Rwanda/
+├── backend/
+│   ├── api/
+│   │   ├── ml_service.py           # Load loan models (.pkl) and run predictions
+│   │   ├── explanations.py         # Human‑readable explanations for ML outputs
+│   │   ├── chatbot_service.py      # Load Flan‑T5 from saved-model/ and generate replies
+│   │   ├── translation_service.py  # MarianMT translation EN<->FR/RW for chatbot
+│   │   ├── views.py                # DRF views (auth, ML, chatbot, dashboards)
+│   │   ├── urls.py                 # /api/... routes
+│   │   ├── models.py               # UserProfile, FarmerProfile, Loan, Repayment, etc.
+│   │   ├── serializers.py          # Auth & DTO serializers
+│   │   └── management/commands/
+│   │       └── createtestusers.py  # Helper to create demo users
+│   ├── config/
+│   │   ├── settings.py             # Django settings (MODELS_DIR, PROJECT_ROOT, CORS, etc.)
+│   │   └── urls.py                 # /api/, /swagger/, /redoc/
+│   ├── requirements.txt            # Backend dependencies (Django, DRF, TF, transformers, torch)
+│   └── manage.py
+│
+├── frontend/
+│   ├── src/
+│   │   ├── api/client.js           # All API calls (auth, ML, chatbot, dashboards)
+│   │   ├── pages/
+│   │   │   ├── LandingPage.jsx
+│   │   │   ├── GetStartedPage.jsx
+│   │   │   ├── TryModelsPage.jsx   # Loan cards + chatbot card
+│   │   │   ├── FarmerDashboard.jsx
+│   │   │   ├── MicrofinanceDashboard.jsx
+│   │   │   └── AdminDashboard.jsx
+│   │   ├── components/
+│   │   │   ├── LoanEligibilityCard.jsx
+│   │   │   ├── RiskAssessmentCard.jsx
+│   │   │   ├── LoanRecommendationCard.jsx
+│   │   │   ├── ChatbotCard.jsx
+│   │   │   └── FloatingChatbot.jsx
+│   │   └── context/LanguageContext.jsx
+│   ├── vite.config.js              # Vite dev server + /api proxy -> 127.0.0.1:8080
+│   └── package.json
+│
+├── Notebooks/
+│   ├── train_loan_default_risk_model.ipynb
+│   ├── Financial_LLM_Chatbot.ipynb
+│   └── loan_default_risk_model/    # Notebook‑generated model artifacts (backup copy)
+│
+├── datasets/
+│   ├── Loan.csv                    # Raw loan dataset (Kaggle)
+│   ├── loan_cleaned.csv            # Cleaned dataset used for training
+│   └── Bitext-mortgage-loans-llm-chatbot-training-dataset/
+│       └── bitext-mortgage-loans-llm-chatbot-training-dataset.csv
+│
+├── loan_default_risk_model/        # Production model artifacts used by backend
+│   ├── feature_columns.pkl
+│   ├── scaler.pkl
+│   ├── label_encoder.pkl
+│   ├── loan_default_classifier.pkl
+│   ├── risk_score_regressor.pkl
+│   └── loan_amount_regressor.pkl
+│
+├── saved-model/                    # (ignored by git) Flan‑T5 chatbot model + tokenizer
+├── requirements.txt                # Root DS requirements (for notebooks, optional)
+└── README.md
+```
+
+---
+
+## 4. Datasets
+
+### Loan models
+
+- **Source:** [Kaggle — Financial Risk for Loan Approval](https://www.kaggle.com/datasets/lorenzozoppelletto/financial-risk-for-loan-approval)  
+- **Local:** `datasets/Loan.csv` (raw), `datasets/loan_cleaned.csv` (processed)
+- **Used by:**
+  - `Notebooks/train_loan_default_risk_model.ipynb`
+  - Backend `ml_service.py` via the exported `.pkl` artifacts
+
+### Chatbot
+
+- **Source:** [Hugging Face — Bitext Mortgage Loans LLM Chatbot Training Dataset](https://huggingface.co/datasets/bitext/Bitext-mortgage-loans-llm-chatbot-training-dataset)
+- **Local:** `datasets/Bitext-mortgage-loans-llm-chatbot-training-dataset/...`
+- **Used by:** `Notebooks/Financial_LLM_Chatbot.ipynb` to fine‑tune Flan‑T5
+
+---
+
+## 5. Tech Stack
+
+- **Backend**
+  - Python 3.9+
+  - Django 4.x, Django REST Framework
+  - drf-yasg for Swagger/Redoc
+  - SQLite (default) for persistence
+  - ML: scikit‑learn, XGBoost (inside notebook), joblib
+  - Chatbot: TensorFlow + `TFT5ForConditionalGeneration` (transformers 4.x)
+  - Translation: MarianMT models (transformers + torch)
+
+- **Frontend**
+  - React 18
+  - Vite 5
+  - React Router
+
+---
+
+## 6. Designs
+
+Design assets and references for the project (add links or embed images as they become available).
+
+| Type | Description | Link / asset |
+|------|--------------|--------------|
+| **Figma mockups** | UI/UX wireframes and high-fidelity mockups for web app (landing, Try Models, dashboards) | _Add Figma link or `docs/designs/` folder_ |
+| **Circuit / system diagram** | Architecture or data-flow diagram (user → frontend → API → ML models) | _Add image path or link_ |
+| **Screenshots** | App interfaces: landing page, Try Models page, chatbot, Farmer/MFI/Admin dashboards | _Add e.g. `docs/screenshots/` or embed below_ |
+
+### Screenshots (app interfaces)
+
+_Add screenshots here to showcase the running application. Example:_
+
+- **Landing page** — hero, about, services, contact
+- **Try Models** — loan eligibility, risk assessment, loan amount, chatbot card
+- **Floating chatbot** — expanded panel with language selector and reply
+- **Farmer dashboard** — applications, loans, repayments
+- **MFI dashboard** — application review, portfolio
+- **Admin dashboard** — stats, activity log
+
+---
+
+## 7. How to Set Up the Environment and the Project
+
+### 7.1 Backend (API + ML + Chatbot)
+
+From the repo root:
+
+```bash
+python -m venv venv
+# Windows PowerShell:
+.\venv\Scripts\Activate.ps1
+
+cd backend
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver 8080
+```
+
+- API will be at `http://127.0.0.1:8080/api/`
+- Swagger UI: `http://127.0.0.1:8080/swagger/`
+- ReDoc: `http://127.0.0.1:8080/redoc/`
+
+#### Models expected by the backend
+
+- Loan models:
+  - Directory: `loan_default_risk_model/` in project root (sibling of `backend/`)
+  - Controlled by `MODELS_DIR` in `backend/config/settings.py`
+
+- Chatbot model:
+  - Directory: `saved-model/` in project root (not committed to git)
+  - Controlled by `CHATBOT_MODEL_DIR` in `backend/api/chatbot_service.py` (via `settings.PROJECT_ROOT`)
+
+If these directories are missing or incomplete, ML endpoints will return `503` with an error message.
+
+### 7.2 Frontend (React app)
+
+In a separate terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+- App runs at `http://localhost:3000`
+- Vite proxy forwards `/api` to `http://127.0.0.1:8080` (see `frontend/vite.config.js`)
+
+---
+
+## 8. Running the Full Experience
+
+1. **Start backend** (Django on port 8080).
+2. **Start frontend** (Vite on port 3000).
+3. Open `http://localhost:3000`:
+   - Explore the landing page
+   - Go to **“Try Models”** to test:
+     - Loan eligibility
+     - Risk assessment
+     - Loan amount recommendation
+     - Chatbot card
+   - Use the **floating chatbot** in the corner for Q&A
+
+> The chatbot and the loan cards all call the backend through `frontend/src/api/client.js`.
+
+---
+
+## 9. Training / Updating the Models
+
+### 9.1 Loan models
+
+1. Open `Notebooks/train_loan_default_risk_model.ipynb`.
+2. Ensure `datasets/Loan.csv` is present.
+3. Run all cells:
+   - Cleans the data and writes `datasets/loan_cleaned.csv`.
+   - Trains:
+     - Loan approval classifier
+     - Risk score regressor
+     - Loan amount regressor
+   - Exports artifacts (`*.pkl`) into `loan_default_risk_model/`.
+4. Restart the backend so it reloads the updated models.
+
+### 9.2 Chatbot model
+
+1. Open `Notebooks/Financial_LLM_Chatbot.ipynb`.
+2. Ensure the Bitext dataset is available under `datasets/`.
+3. Run all cells to fine‑tune Flan‑T5 on the mortgage/loan Q&A data.
+4. At the end, export the model to **project root**:
+
+   ```python
+   save_dir = r"c:/Users/YourUser/Desktop/ALU/AgriFinConnect-Rwanda/saved-model"
+   tokenizer.save_pretrained(save_dir)
+   model.save_pretrained(save_dir)
+   ```
+
+5. Restart the backend; the chatbot should now use the updated model.
+
+---
+
+## 10. Key API Endpoints (overview)
+
+Base path: `/api/`
+
+- **ML models**
+  - `POST /api/eligibility/` — loan approval prediction
+  - `POST /api/risk/` — default risk score
+  - `POST /api/recommend-amount/` — recommended loan amount
+
+- **Chatbot**
+  - `POST /api/chat/`
+    - Body: `{ "message": "text", "language": "en" | "fr" | "rw" }`
+    - Returns: `{ "reply": "...", "response": "..." }`
+
+- **Auth**
+  - `POST /api/auth/register/`
+  - `POST /api/auth/login/`
+  - `POST /api/auth/forgot-password/`
+  - `POST /api/auth/reset-password/`
+
+- **Farmer / MFI / Admin dashboards**
+  - Farmer: `/api/farmer/profile/`, `/api/farmer/applications/`, `/api/farmer/loans/`, `/api/farmer/repayments/`
+  - MFI: `/api/mfi/applications/`, `/api/mfi/applications/<id>/review/`, `/api/mfi/portfolio/`
+  - Admin: `/api/admin/users/`, `/api/admin/stats/`, `/api/admin/activity/`
+
+See `/swagger/` for full schemas and example payloads.
+
+---
+
+## 11. Environment Variables
+
+Backend (`backend/config/settings.py`):
+
+- `DJANGO_SECRET_KEY` — Django secret key (use a strong value in production)
+- `DJANGO_DEBUG` — `"1"` for debug, `"0"` for production
+- `DJANGO_ALLOWED_HOSTS` — Comma‑separated hostnames
+- `PASSWORD_RESET_FRONTEND_URL` — Base URL of the frontend (for password reset links)
+- `DJANGO_EMAIL_BACKEND`, `DJANGO_FROM_EMAIL` — Email configuration for password reset
+
+Frontend:
+
+- `VITE_API_URL` — Optional; overrides the `/api` proxy base in production builds
+
+---
+
+## 12. Deployment Plan
+
+High-level plan for deploying AgriFinConnect Rwanda to a production or staging environment.
+
+| Step | Task | Notes |
+|------|------|--------|
+| 1 | **Backend hosting** | Deploy Django app to a PaaS (e.g. Railway, Render, Heroku) or VPS (e.g. Ubuntu + Gunicorn + Nginx). Use a production WSGI/ASGI server (Gunicorn/uWSGI or Daphne). |
+| 2 | **Database** | Replace SQLite with PostgreSQL (or another production DB). Set `DATABASES` in settings and run migrations. |
+| 3 | **Static/media** | Serve static files via CDN or Nginx; use environment variables for `SECRET_KEY`, `ALLOWED_HOSTS`, `DEBUG=0`. |
+| 4 | **Model artifacts** | Ensure `loan_default_risk_model/` and `saved-model/` are present on the server (or on shared storage) and paths in settings point to them. |
+| 5 | **Frontend build** | Run `npm run build` in `frontend/`, then serve the `dist/` output via the same domain (Nginx) or a static host (e.g. Vercel, Netlify). Set `VITE_API_URL` to the production API base URL. |
+| 6 | **API base URL** | Configure frontend to call the production API (e.g. `https://api.agrifinconnect.rw`) and ensure CORS allows the frontend origin. |
+| 7 | **Email** | Configure a real email backend (SMTP or SendGrid) for password reset; set `PASSWORD_RESET_FRONTEND_URL` to the live frontend URL. |
+| 8 | **HTTPS** | Use TLS (e.g. Let’s Encrypt) for both frontend and backend. |
+| 9 | **Monitoring** | Optional: logging, health checks (`/api/` or a dedicated `/health/`), and error tracking (e.g. Sentry). |
+
+_Adjust steps to match your chosen hosting (single server vs. separate frontend/backend, managed DB, etc.)._
+
+---
+
+## 13. License & Notes
+
+- Datasets come with their own licenses (Kaggle / Bitext — see their pages).
+- Models from Hugging Face (Flan‑T5, MarianMT) are subject to their respective licenses.
+- This repository is for research / educational purposes under the AgriFinConnect initiative.
+
+**Contributing:** Pull requests and issues are welcome on [GitHub](https://github.com/Annemarie535257/AgriFinConnect-Rwanda).
 
