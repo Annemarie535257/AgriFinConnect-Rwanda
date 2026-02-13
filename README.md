@@ -1,8 +1,6 @@
 # AgriFinConnect Rwanda
 
-[![GitHub](https://img.shields.io/badge/GitHub-AgriFinConnect--Rwanda-181717?logo=github)](https://github.com/Annemarie535257/AgriFinConnect-Rwanda)
-
-**Repository:** [https://github.com/Annemarie535257/AgriFinConnect-Rwanda](https://github.com/Annemarie535257/AgriFinConnect-Rwanda)
+Github link: https://github.com/Annemarie535257/AgriFinConnect-Rwanda.git
 
 ```bash
 git clone https://github.com/Annemarie535257/AgriFinConnect-Rwanda.git
@@ -20,6 +18,12 @@ AgriFinConnect Rwanda is a project aimed at **improving agricultural finance and
 - A **financial assistant chatbot** (Flan‑T5) with support for **English, French, and Kinyarwanda**
 
 The platform helps farmers explore loan eligibility and recommended amounts, allows MFIs to review applications and manage portfolio risk, and provides a multilingual AI assistant for loan-related questions.
+
+---
+
+## Demo
+
+link : https://youtu.be/_h2mcfVPl2Y
 
 ---
 
@@ -178,30 +182,6 @@ AgriFinConnect-Rwanda/
   - React Router
 
 ---
-
-## 6. Designs
-
-Design assets and references for the project (add links or embed images as they become available).
-
-| Type | Description | Link / asset |
-|------|--------------|--------------|
-| **Figma mockups** | UI/UX wireframes and high-fidelity mockups for web app (landing, Try Models, dashboards) | _Add Figma link or `docs/designs/` folder_ |
-| **Circuit / system diagram** | Architecture or data-flow diagram (user → frontend → API → ML models) | _Add image path or link_ |
-| **Screenshots** | App interfaces: landing page, Try Models page, chatbot, Farmer/MFI/Admin dashboards | _Add e.g. `docs/screenshots/` or embed below_ |
-
-### Screenshots (app interfaces)
-
-_Add screenshots here to showcase the running application. Example:_
-
-- **Landing page** — hero, about, services, contact
-- **Try Models** — loan eligibility, risk assessment, loan amount, chatbot card
-- **Floating chatbot** — expanded panel with language selector and reply
-- **Farmer dashboard** — applications, loans, repayments
-- **MFI dashboard** — application review, portfolio
-- **Admin dashboard** — stats, activity log
-
----
-
 ## 7. How to Set Up the Environment and the Project
 
 ### 7.1 Backend (API + ML + Chatbot)
@@ -350,25 +330,15 @@ High-level plan for deploying AgriFinConnect Rwanda to a production or staging e
 
 | Step | Task | Notes |
 |------|------|--------|
-| 1 | **Backend hosting** | Deploy Django app to a PaaS (e.g. Railway, Render, Heroku) or VPS (e.g. Ubuntu + Gunicorn + Nginx). Use a production WSGI/ASGI server (Gunicorn/uWSGI or Daphne). |
+| 1 | **Backend hosting** | Deploy Django app to Render or Heroku. Use a production WSGI/ASGI server-Gunicorn. |
 | 2 | **Database** | Replace SQLite with PostgreSQL (or another production DB). Set `DATABASES` in settings and run migrations. |
 | 3 | **Static/media** | Serve static files via CDN or Nginx; use environment variables for `SECRET_KEY`, `ALLOWED_HOSTS`, `DEBUG=0`. |
 | 4 | **Model artifacts** | Ensure `loan_default_risk_model/` and `saved-model/` are present on the server (or on shared storage) and paths in settings point to them. |
-| 5 | **Frontend build** | Run `npm run build` in `frontend/`, then serve the `dist/` output via the same domain (Nginx) or a static host (e.g. Vercel, Netlify). Set `VITE_API_URL` to the production API base URL. |
-| 6 | **API base URL** | Configure frontend to call the production API (e.g. `https://api.agrifinconnect.rw`) and ensure CORS allows the frontend origin. |
+| 5 | **Frontend build** | Run `npm run build` in `frontend/`, then serve the `dist/` output via a static host-Netlify. Set `VITE_API_URL` to the production API base URL. |
+| 6 | **API base URL** | Configure frontend to call the production API and ensure CORS allows the frontend origin. |
 | 7 | **Email** | Configure a real email backend (SMTP or SendGrid) for password reset; set `PASSWORD_RESET_FRONTEND_URL` to the live frontend URL. |
 | 8 | **HTTPS** | Use TLS (e.g. Let’s Encrypt) for both frontend and backend. |
 | 9 | **Monitoring** | Optional: logging, health checks (`/api/` or a dedicated `/health/`), and error tracking (e.g. Sentry). |
 
-_Adjust steps to match your chosen hosting (single server vs. separate frontend/backend, managed DB, etc.)._
-
 ---
-
-## 13. License & Notes
-
-- Datasets come with their own licenses (Kaggle / Bitext — see their pages).
-- Models from Hugging Face (Flan‑T5, MarianMT) are subject to their respective licenses.
-- This repository is for research / educational purposes under the AgriFinConnect initiative.
-
-**Contributing:** Pull requests and issues are welcome on [GitHub](https://github.com/Annemarie535257/AgriFinConnect-Rwanda).
 
