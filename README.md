@@ -23,7 +23,7 @@ The platform helps farmers explore loan eligibility and recommended amounts, all
 
 ## Demo
 
-link : https://youtu.be/_h2mcfVPl2Y
+link : https://drive.google.com/file/d/1X3JCoGWCgT6zR_3i8_JM-3kLIcqoSxFS/view?usp=sharing
 
 ---
 
